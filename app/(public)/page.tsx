@@ -19,7 +19,7 @@ export default function HomePage() {
         <header className="flex items-center justify-between border-b border-white/10 px-6 py-5 backdrop-blur">
           <div className="flex items-center gap-4">
             <img
-              src="/logo.png"
+              src="/IMG_1198.jpeg"
               alt="PCMET"
               className="h-12 w-12 rounded-xl bg-white p-1 object-contain"
             />
