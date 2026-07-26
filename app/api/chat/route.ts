@@ -1,47 +1,62 @@
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function POST(req: Request) {
   try {
     const { message } = await req.json();
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
-      messages: [
-        {
-          role: "system",
-          content: `
-أنت PCMET Assist، المساعد الذكي الرسمي لمركز PCMET.
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4.1-mini",
+        messages: [
+          {
+            role: "system",
+            content: `
+أنت PCMET Assist.
 
-مهمتك:
-- تساعد المتدربين على اختيار الدورة المناسبة.
-- تجيب بالعربية التونسية أو الفرنسية حسب لغة المستخدم.
-- تشرح الشهادات والمستويات.
-- تساعد في إعداد CV.
-- تساعد في الدراسة والعمل في ألمانيا.
-- لا تخترع معلومات غير موجودة.
-- كن محترفاً ومختصراً.
-`,
-        },
-        {
-          role: "user",
-          content: message,
-        },
-      ],
+أنت المساعد الذكي الرسمي لمركز PCMET.
+
+تجيب بالعربية التونسية أو الفرنسية حسب لغة المستخدم.
+
+تساعد في:
+- اختيار الدورات
+- تعلم اللغات
+- تكوين ألمانيا Ausbildung
+- إعداد CV
+- الشهادات
+- التسجيل
+- خدمات PCMET
+
+لا تخترع معلومات غير صحيحة.
+كن مختصراً واحترافياً.
+            `,
+          },
+          {
+            role: "user",
+            content: message,
+          },
+        ],
+        temperature: 0.7,
+      }),
     });
 
+    const data = await response.json();
+
     return Response.json({
-      reply: completion.choices[0].message.content,
+      reply:
+        data.choices?.[0]?.message?.content ??
+        "عذراً، لم أتمكن من الإجابة.",
     });
   } catch (error) {
     return Response.json(
       {
-        reply: "حدث خطأ أثناء الاتصال بالمساعد.",
+        reply: "حدث خطأ في الاتصال بالمساعد.",
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }
